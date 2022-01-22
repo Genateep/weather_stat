@@ -4,16 +4,14 @@ from collections import defaultdict
 import requests
 from django.db.models import Max, Min, Avg, Count
 import json
-from .models import OneDayData
-
-WWO_API = '469327e52a7d4df9b31102143222101'
+from models import OneDayData
 
 
 def get_info_from_site():
     link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
-    secret_key = WWO_API
-    data = {'days': []}
-    for year in range(2010, 2022):
+    wwo_api_key = '469327e52a7d4df9b31102143222101'
+
+    for year in range(2021, 2022):
         for month in range(1, 12):
             payload = {
                 "q": "Moscow",
@@ -21,50 +19,23 @@ def get_info_from_site():
                 "date": f"{year}-{month}-01",
                 "enddate": f"{year}-{month + 1}-01",
                 "format": "json",
-                "key": secret_key
+                "key": wwo_api_key
             }
             response = requests.get(link, params=payload)
             for day in response.json()['data']['weather']:
-                data['days'].append(
-                    {
-                        'date': day['date'],
-                        'maxTemp': day['maxtempC'],
-                        'minTemp': day['mintempC'],
-                        'avgTemp': day['avgtempC'],
-                        'windSpeed': day['hourly'][0]['windspeedKmph'],
-                        'windDir': day['hourly'][0]['winddir16Point'],
-                        'precipitation': day['hourly'][0]['precipMM'],
-                        'desc': day['hourly'][0]['weatherDesc'][0]['value']
-                    }
+                o = OneDayData(
+                    city=city,
+                    date=day['date'],
+                    maxTemp=day['maxtempC'],
+                    minTemp=day['mintempC'],
+                    avgTemp=day['avgtempC'],
+                    windSpeed=day['hourly'][0]['windspeedKmph'],
+                    windDir=day['hourly'][0]['winddir16Point'],
+                    precipitation=day['hourly'][0]['precipMM'],
+                    desc=day['hourly'][0]['weatherDesc'][0]['value']
                 )
-            data['days'].pop()
-        for d in range(1, 31):
-            payload = {
-                "q": "Moscow",
-                "date": f"{year}-12-{d}",
-                "enddate": f"{year}-12-{d + 1}",
-                "format": "json",
-                "key": secret_key
-            }
-            response = requests.get(link, params=payload)
-            for day in response.json()['data']['weather']:
-                data['days'].append(
-                    {
-                        'date': day['date'],
-                        'avgTemp': day['maxtempC'],
-                        'minTemp': day['mintempC'],
-                        'maxTemp': day['avgtempC'],
-                        'windSpeed': day['hourly'][0]['windspeedKmph'],
-                        'windDir': day['hourly'][0]['winddir16Point'],
-                        'precipitation': day['hourly'][0]['precipMM'],
-                        'desc': day['hourly'][0]['weatherDesc'][0]['value']
-                    }
-                )
-    return data
+                o.save()
 
-
-with open('data.txt', 'w') as outfile:
-    json.dump(get_info_from_site(), outfile)
 
 # def upload_data_to_base(data: dict):
 #     city_name = data["data"]["request"][0]["query"]
