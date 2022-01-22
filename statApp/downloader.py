@@ -11,6 +11,24 @@ def get_info_from_site():
     link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
     wwo_api_key = '469327e52a7d4df9b31102143222101'
 
+    cities = [
+        'Moscow',
+        'Saint Petersburg',
+        'Novosibirsk',
+        'Ekaterinburg',
+        'Kazan',
+        'Nizhniy Novgorod',
+        'Chelyabinsk',
+        'Samara',
+        'Omsk',
+        'Rostov-on-don',
+        'Helsinki',
+        'Minsk',
+        'Berlin',
+        'Paris',
+        'London'
+    ]
+
     for year in range(2021, 2022):
         for month in range(1, 12):
             payload = {

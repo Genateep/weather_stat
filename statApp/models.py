@@ -1,9 +1,10 @@
 import datetime
-
-from django.db import models
-
+import os
 import requests
+
 from datetime import date, timedelta
+from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class OneDayData(models.Model):
@@ -21,44 +22,74 @@ class OneDayData(models.Model):
         return self.city
 
 
-def get_info_from_site(city='Moscow', startdate='2021-01-01', enddate=str(date.today())):
+cities = [
+        'Moscow',
+        'Saint Petersburg',
+        'Novosibirsk',
+        'Ekaterinburg',
+        'Kazan',
+        'Nizhniy Novgorod',
+        'Chelyabinsk',
+        'Samara',
+        'Omsk',
+        'Rostov-on-don',
+        'Helsinki',
+        'Minsk',
+        'Berlin',
+        'Paris',
+        'London'
+    ]
+
+
+def get_info_from_site(cities, enddate=date.today()):
     link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
-    wwo_api_key = '469327e52a7d4df9b31102143222101'
+    wwo_api_key = os.environ.get('WWO_API')
 
-    startdate = date(int(startdate[:4]), int(startdate[5:7]), int(startdate[8:]))
-    enddate = date(int(enddate[:4]), int(enddate[5:7]), int(enddate[8:]))
+    # startdate = date(int(startdate[:4]), int(startdate[5:7]), int(startdate[8:]))
+    # enddate = date(int(enddate[:4]), int(enddate[5:7]), int(enddate[8:]))
 
-    def downloader(startdate, enddate):
-        payload = {
-            "q": city,
-            "tp": '24',
-            "date": startdate,
-            "enddate": enddate,
-            "format": "json",
-            "key": wwo_api_key
-        }
-        response = requests.get(link, params=payload)
-        for day in response.json()['data']['weather']:
-            o = OneDayData(
-                city=city,
-                date=day['date'],
-                maxTemp=day['maxtempC'],
-                minTemp=day['mintempC'],
-                avgTemp=day['avgtempC'],
-                windSpeed=day['hourly'][0]['windspeedKmph'],
-                windDir=day['hourly'][0]['winddir16Point'],
-                precipitation=day['hourly'][0]['precipMM'],
-                desc=day['hourly'][0]['weatherDesc'][0]['value']
-            )
-            o.save()
+    try:
+        latest_saved = OneDayData.objects.latest('id').date
+    except ObjectDoesNotExist:
+        latest_saved = date(2021, 1, 1)
+
+    if latest_saved == enddate:
+        return
+    else:
+        startdate = latest_saved + timedelta(1)
+
+    def downloader(cities, startdate, enddate):
+        for city in cities:
+            payload = {
+                "q": city,
+                "tp": '24',
+                "date": startdate,
+                "enddate": enddate,
+                "format": "json",
+                "key": wwo_api_key
+            }
+            response = requests.get(link, params=payload)
+            for day in response.json()['data']['weather']:
+                o = OneDayData(
+                    city=city,
+                    date=day['date'],
+                    maxTemp=day['maxtempC'],
+                    minTemp=day['mintempC'],
+                    avgTemp=day['avgtempC'],
+                    windSpeed=day['hourly'][0]['windspeedKmph'],
+                    windDir=day['hourly'][0]['winddir16Point'],
+                    precipitation=day['hourly'][0]['precipMM'],
+                    desc=day['hourly'][0]['weatherDesc'][0]['value']
+                )
+                o.save()
 
     if (enddate - startdate).days <= 35:
-        return downloader(startdate, enddate)
+        return downloader(cities, startdate, enddate)
     elif (enddate - startdate).days > 35:
         while startdate < (enddate - timedelta(35)):
-            downloader(startdate, enddate)
+            downloader(cities, startdate, enddate)
             startdate += timedelta(35)
-        downloader(startdate, enddate)
+        downloader(cities, startdate, enddate)
 
 
-get_info_from_site()
+get_info_from_site(cities)
