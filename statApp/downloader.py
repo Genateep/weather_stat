@@ -7,6 +7,7 @@ import json
 # from models import OneDayData
 
 link = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weatherdata/history?'
+# VC_KEY = os.environ.get('VC_KEY')
 VC_KEY = 'CW9G58J7LK7BR6NJJW595YMPF'
 
 city = 'Moscow'
@@ -15,15 +16,12 @@ payload = {
     "locations": city,
     "aggregateHours": '24',
     'unitGroup': 'metric',
-    "startDateTime": "2010-01-01",
-    "endDateTime": "2010-01-01",
+    "startDateTime": "2022-01-22",
+    "endDateTime": "2022-01-22",
     "contentType": "json",
     "key": VC_KEY,
 }
-response = requests.get(
-    f'{link}',
-    params=payload
-)
+response = requests.get(link, params=payload)
 day = response.json()['locations'][city]['values'][0]
 result = {
     'city': city,
