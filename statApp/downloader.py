@@ -4,55 +4,88 @@ from collections import defaultdict
 import requests
 from django.db.models import Max, Min, Avg, Count
 import json
-from models import OneDayData
+# from models import OneDayData
+
+link = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weatherdata/history?'
+VC_KEY = 'CW9G58J7LK7BR6NJJW595YMPF'
+
+city = 'Moscow'
+
+payload = {
+    "locations": city,
+    "aggregateHours": '24',
+    'unitGroup': 'metric',
+    "startDateTime": "2010-01-01",
+    "endDateTime": "2010-01-01",
+    "contentType": "json",
+    "key": VC_KEY,
+}
+response = requests.get(
+    f'{link}',
+    params=payload
+)
+day = response.json()['locations'][city]['values'][0]
+result = {
+    'city': city,
+    'date': day['datetimeStr'][:10],
+    'maxTemp': day['maxt'],
+    'minTemp': day['mint'],
+    'avgTemp': day['temp'],
+    'windSpeed': round(day['wspd'] / 3.6),
+    'windDir': day['wdir'],
+    'precipitation': day['precip'],
+    'desc': day['conditions']
+}
+print(result)
 
 
-def get_info_from_site():
-    link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
-    wwo_api_key = '469327e52a7d4df9b31102143222101'
 
-    cities = [
-        'Moscow',
-        'Saint Petersburg',
-        'Novosibirsk',
-        'Ekaterinburg',
-        'Kazan',
-        'Nizhniy Novgorod',
-        'Chelyabinsk',
-        'Samara',
-        'Omsk',
-        'Rostov-on-don',
-        'Helsinki',
-        'Minsk',
-        'Berlin',
-        'Paris',
-        'London'
-    ]
-
-    for year in range(2021, 2022):
-        for month in range(1, 12):
-            payload = {
-                "q": "Moscow",
-                "tp": '24',
-                "date": f"{year}-{month}-01",
-                "enddate": f"{year}-{month + 1}-01",
-                "format": "json",
-                "key": wwo_api_key
-            }
-            response = requests.get(link, params=payload)
-            for day in response.json()['data']['weather']:
-                o = OneDayData(
-                    city=city,
-                    date=day['date'],
-                    maxTemp=day['maxtempC'],
-                    minTemp=day['mintempC'],
-                    avgTemp=day['avgtempC'],
-                    windSpeed=day['hourly'][0]['windspeedKmph'],
-                    windDir=day['hourly'][0]['winddir16Point'],
-                    precipitation=day['hourly'][0]['precipMM'],
-                    desc=day['hourly'][0]['weatherDesc'][0]['value']
-                )
-                o.save()
+# def get_info_from_site():
+#     link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
+#     wwo_api_key = '469327e52a7d4df9b31102143222101'
+#
+#     cities = [
+#         'Moscow',
+#         'Saint Petersburg',
+#         'Novosibirsk',
+#         'Ekaterinburg',
+#         'Kazan',
+#         'Nizhniy Novgorod',
+#         'Chelyabinsk',
+#         'Samara',
+#         'Omsk',
+#         'Rostov-on-don',
+#         'Helsinki',
+#         'Minsk',
+#         'Berlin',
+#         'Paris',
+#         'London'
+#     ]
+#
+#     for year in range(2021, 2022):
+#         for month in range(1, 12):
+#             payload = {
+#                 "q": "Moscow",
+#                 "tp": '24',
+#                 "date": f"{year}-{month}-01",
+#                 "enddate": f"{year}-{month + 1}-01",
+#                 "format": "json",
+#                 "key": wwo_api_key
+#             }
+#             response = requests.get(link, params=payload)
+#             for day in response.json()['data']['weather']:
+#                 o = OneDayData(
+#                     city=city,
+#                     date=day['date'],
+#                     maxTemp=day['maxtempC'],
+#                     minTemp=day['mintempC'],
+#                     avgTemp=day['avgtempC'],
+#                     windSpeed=day['hourly'][0]['windspeedKmph'],
+#                     windDir=day['hourly'][0]['winddir16Point'],
+#                     precipitation=day['hourly'][0]['precipMM'],
+#                     desc=day['hourly'][0]['weatherDesc'][0]['value']
+#                 )
+#                 o.save()
 
 
 # def upload_data_to_base(data: dict):
