@@ -8,14 +8,13 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class CityList(models.Model):
-    city = models.CharField(max_length=255, verbose_name='Название города')
+    city = models.CharField(max_length=30, verbose_name='Название города')
 
     def __str__(self):
         return self.city
 
 
 class OneDayData(models.Model):
-    # city = models.CharField(max_length=30)
     city = models.ForeignKey(CityList, null=True, blank=True, default=None, on_delete=models.CASCADE)
     date = models.DateField()
     maxTemp = models.SmallIntegerField()

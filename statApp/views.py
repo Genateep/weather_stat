@@ -6,7 +6,7 @@ import json
 from .models import OneDayData
 from .forms import *
 from django.views.generic import TemplateView
-from django.db.models import Q, Min, Max, Avg
+from django.db.models import Q, Min, Max, Avg, Count
 from django.db.models.functions import Coalesce
 
 
@@ -68,8 +68,9 @@ class IndexPage(TemplateView):
                 date__range=[post_date['start_date'], post_date['end_date']]
             ).aggregate(
                 abs_min_temp=Min('minTemp'),
+                avg_temp=Avg('avgTemp'),
                 abs_max_temp=Max('maxTemp'),
-                avg_temp=Avg('avgTemp')
+                precip_days=Count('precipitation', filter=Q(precipitation=0))
             )
             print('stat_weather: ', stat_weather['abs_min_temp'])
 
@@ -79,4 +80,3 @@ class IndexPage(TemplateView):
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
-

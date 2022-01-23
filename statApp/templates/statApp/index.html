@@ -44,12 +44,16 @@
         <div class=" card text-dark bg-dark mb-6">
             <div class=" card-body">
                 <h4><span class="badge badge-primary">Min temperature :</span> {{stat_weather.abs_min_temp}}</h4>
-                <h4><span class="badge badge-primary">Max temperature :</span> {{stat_weather.abs_max_temp}}</h4>
                 <h4><span class="badge badge-primary">Avg temperature :</span> {{stat_weather.avg_temp}}</h4>
+                <h4><span class="badge badge-primary">Max temperature :</span> {{stat_weather.abs_max_temp}}</h4>
+                <h4><span class="badge badge-primary">Avg max year temp :</span> {{...}}</h4>
+                <h4><span class="badge badge-primary">Avg min year temp :</span> {{...}}</h4>
+                <h4><span class="badge badge-primary">Day with similar temp :</span> {{...}}</h4>
+                <h4><span class="badge badge-primary">days with precipitation :</span> {{stat_weather.precip_days}}</h4>
                 <h4><span class="badge badge-primary">Wind speed :</span> {{wind_speed}} </h4>
                 <h4><span class="badge badge-primary">Wind degree : </span> {{wind_deg}}</h4>
                 <h4><span class="badge badge-primary">Description : </span> {{description}} <img
-                        src="http://openweathermap.org/img/w/{{icon}}.png" alt="Image" style="width:70px"></h4>
+                        src="http://openweathermap.org/img/w/{{icon}}.png" alt="Image" style="width:100px"></h4>
             </div>
         </div>
     </div>
