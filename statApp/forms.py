@@ -9,4 +9,3 @@ class CityAndDatesForm(forms.ModelForm):
     class Meta:
         model = OneDayData
         fields = ['city', 'start_date', 'end_date']
-        # fields = ('city',)

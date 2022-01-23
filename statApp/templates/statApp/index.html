@@ -18,45 +18,35 @@
     </div>
 </div>
 
-<br><br>
+<br>
 <div id="jumbotron" class="jumbotron" style="text-align: center; margin-top:50px">
-    <img src="{% static 'images/weather.png' %}" class="image" style="width:120px; margin-bottom:30px; ">
+    <img src="{% static 'images/weather.png' %}" class="image" style="width:100px; margin-bottom:20px; ">
 </div>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     {% block 'form_get_weather' %}
-    <form method="post" class="col-md">
-        {% csrf_token %}
-        <div class=" input-group">
-
-            <input type="text" class="form-control" name="city" placeholder="Enter city name here...">
-            <div class="input-group-btn">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </div>
-    </form>
     {% endblock %}
-
 </nav>
 <br>
+
 <div class="row">
     <div class="col d-flex justify-content-center">
         <div class=" card text-dark bg-dark mb-6">
             <div class=" card-body">
-                <h4><span class="badge badge-primary">Min temperature :</span> {{stat.abs_min_temp}}</h4>
-                <h4><span class="badge badge-primary">Avg temperature :</span> {{stat.avg_temp}}</h4>
-                <h4><span class="badge badge-primary">Max temperature :</span> {{stat.abs_max_temp}}</h4>
-                <h4><span class="badge badge-primary">Avg max year temp :</span> {{stat.year_max}}</h4>
-                <h4><span class="badge badge-primary">Avg min year temp :</span> {{stat.year_min}}</h4>
-                <h4><span class="badge badge-primary">Day with similar temp :</span> {{...}}</h4>
-                <h4><span class="badge badge-primary">Days with precipitation :</span> {{stat.precip_days}}</h4>
-                <h4><span class="badge badge-primary">Most frequent precipitation : </span> {{stat.most_frequent_prec}} </h4>
-                <h4><span class="badge badge-primary">Awg wind speed :</span> {{stat.avg_wind_speed}} </h4>
+                <h4><span class="badge badge-primary">Min temperature :</span> {{stat.abs_min_temp}} °C</h4>
+                <h4><span class="badge badge-primary">Avg temperature :</span> {{stat.avg_temp}} °C</h4>
+                <h4><span class="badge badge-primary">Max temperature :</span> {{stat.abs_max_temp}} °C</h4>
+                <h4><span class="badge badge-primary">Avg max year temp :</span> {{stat.year_max}} °C</h4>
+                <h4><span class="badge badge-primary">Avg min year temp :</span> {{stat.year_min}} °C</h4>
+<!--                <h4><span class="badge badge-primary">Day with similar temp :</span> {{...}}</h4>-->
+                <h4><span class="badge badge-primary">Days with precipitation :</span> {{stat.precip_days}} %</h4>
+                <h4><span class="badge badge-primary">Most frequent precipitation : </span> {{stat.most_frequent_prec}}
+                </h4>
+                <h4><span class="badge badge-primary">Awg wind speed :</span> {{stat.avg_wind_speed}} m/s</h4>
                 <h4><span class="badge badge-primary">Awg wind direction : </span> {{stat.avg_wind_dir}}</h4>
             </div>
         </div>
     </div>
 </div>
 </body>
-
 </html>

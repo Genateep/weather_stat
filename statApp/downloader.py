@@ -1,196 +1,142 @@
-import math
-import os
-from collections import defaultdict
+from datetime import date, timedelta
 import requests
-from django.db.models import Max, Min, Avg, Count
 import json
-# from models import OneDayData
+from .models import OneDayData, CityList
+from django.core.exceptions import ObjectDoesNotExist
 
-link = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weatherdata/history?'
-# VC_KEY = os.environ.get('VC_KEY')
 VC_KEY = 'CW9G58J7LK7BR6NJJW595YMPF'
-
-city = 'Moscow'
-
-payload = {
-    "locations": city,
-    "aggregateHours": '24',
-    'unitGroup': 'metric',
-    "startDateTime": "2022-01-22",
-    "endDateTime": "2022-01-22",
-    "contentType": "json",
-    "key": VC_KEY,
-}
-response = requests.get(link, params=payload)
-day = response.json()['locations'][city]['values'][0]
-result = {
-    'city': city,
-    'date': day['datetimeStr'][:10],
-    'maxTemp': day['maxt'],
-    'minTemp': day['mint'],
-    'avgTemp': day['temp'],
-    'windSpeed': round(day['wspd'] / 3.6),
-    'windDir': day['wdir'],
-    'precipitation': day['precip'],
-    'desc': day['conditions']
-}
-print(result)
+wwo_api_key = 'f5a196eaccca4cfe84a191947222301'
+CITIES = [
+        'Moscow',
+        'Saint Petersburg',
+        'Novosibirsk',
+        'Ekaterinburg',
+        'Kazan',
+        'Nizhniy Novgorod',
+        'Chelyabinsk',
+        'Samara',
+        'Vladivostok',
+        'Murmansk',
+        'Helsinki',
+        'Minsk',
+        'Berlin',
+        'Paris',
+        'London'
+    ]
 
 
+# for city in CITIES:
+#     c = CityList(city=city)
+#     c.save()
 
-# def get_info_from_site():
-#     link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
-#     wwo_api_key = '469327e52a7d4df9b31102143222101'
+
+# def download_from_vc(enddate=date.today()):
+#     link = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weatherdata/history?'
+#     # VC_KEY = os.environ.get('VC_KEY')
+#     try:
+#         latest_saved = OneDayData.objects.latest('id').date
+#     except ObjectDoesNotExist:
+#             latest_saved = date(2010, 1, 1)
 #
-#     cities = [
-#         'Moscow',
-#         'Saint Petersburg',
-#         'Novosibirsk',
-#         'Ekaterinburg',
-#         'Kazan',
-#         'Nizhniy Novgorod',
-#         'Chelyabinsk',
-#         'Samara',
-#         'Omsk',
-#         'Rostov-on-don',
-#         'Helsinki',
-#         'Minsk',
-#         'Berlin',
-#         'Paris',
-#         'London'
-#     ]
+#     if latest_saved == enddate:
+#         return
+#     elif latest_saved == date(2010, 1, 1):
+#         startdate = latest_saved
+#     else:
+#         startdate = latest_saved + timedelta(1)
 #
-#     for year in range(2021, 2022):
-#         for month in range(1, 12):
+#     def downloader(startdate, enddate):
+#         for obj in CityList.objects.all():
+#             print(type(obj))
+#             city = str(obj)
 #             payload = {
-#                 "q": "Moscow",
-#                 "tp": '24',
-#                 "date": f"{year}-{month}-01",
-#                 "enddate": f"{year}-{month + 1}-01",
-#                 "format": "json",
-#                 "key": wwo_api_key
+#                 "locations": city,
+#                 "aggregateHours": '24',
+#                 'unitGroup': 'metric',
+#                 "startDateTime": startdate,
+#                 "endDateTime": enddate,
+#                 "contentType": "json",
+#                 "key": VC_KEY,
 #             }
 #             response = requests.get(link, params=payload)
-#             for day in response.json()['data']['weather']:
+#             print(response.json())
+#             for day in response.json()['locations'][city]['values']:
 #                 o = OneDayData(
-#                     city=city,
-#                     date=day['date'],
-#                     maxTemp=day['maxtempC'],
-#                     minTemp=day['mintempC'],
-#                     avgTemp=day['avgtempC'],
-#                     windSpeed=day['hourly'][0]['windspeedKmph'],
-#                     windDir=day['hourly'][0]['winddir16Point'],
-#                     precipitation=day['hourly'][0]['precipMM'],
-#                     desc=day['hourly'][0]['weatherDesc'][0]['value']
+#                     city=obj,
+#                     date=day['datetimeStr'][:10],
+#                     maxTemp=day['maxt'],
+#                     minTemp=day['mint'],
+#                     avgTemp=day['temp'],
+#                     windSpeed=round(day['wspd'] / 3.6),
+#                     windDir=day['wdir'],
+#                     precipitation=day['precip'],
+#                     desc=day['conditions']
 #                 )
 #                 o.save()
+#
+#     if (enddate - startdate).days <= 10:
+#         return downloader(startdate, enddate)
+#     elif (enddate - startdate).days > 10:
+#         while startdate < (enddate - timedelta(10)):
+#             downloader(startdate, startdate + timedelta(10))
+#             startdate += timedelta(10)
+#         downloader(startdate, enddate)
 
 
-# def upload_data_to_base(data: dict):
-#     city_name = data["data"]["request"][0]["query"]
-#     for date in data["data"]["weather"]:
-#         cc = City.objects.filter(city_name=city_name, date=date["date"]).count()
-#         if cc >= 1:
-#             continue
-#         hourly = date["hourly"]
-#         day = City()
-#         day.city_name = city_name
-#         day.date = str(date["date"])
-#         day.date_year = str(date["date"][:4])
-#         day.date_month = str(date["date"][5:7])
-#         day.date_day = str(date["date"][8:])
-#
-#         day.avg_temp_of_day = date["avgtempC"]
-#         day.max_temp_of_day = date["maxtempC"]
-#         day.min_temp_of_day = date["mintempC"]
-#
-#         day.precipMM = sum(
-#             [float(time["precipMM"])for time in hourly]) / len(hourly)
-#
-#         day.most_common_weather = find_most_common_weather(
-#             [time["weatherDesc"][0]["value"] for time in hourly])
-#
-#         day.wind_avg_direction = calculate_average_wind_direction(
-#             [int(time["winddirDegree"]) for time in hourly])
-#
-#         day.wind_avg_velocity = sum(
-#             [int(time["windspeedKmph"])for time in hourly]) / len(hourly)
-#
-#         day.save()
-#
-#
-# def calculate_data_to_show(request):
-#     context = {}
-#     city_name = request.POST["choosen_city"]
-#     start_date = request.POST["choosen_startdate"]
-#     end_date = request.POST["choosen_enddate"]
-#     data_to_show = City.objects.filter(
-#         city_name__startswith=city_name,
-#         date__range=(start_date, end_date),
-#     )
-#     context["city_name"] = city_name
-#     context["start_date"] = data_to_show.first().date
-#     context["end_date"] = data_to_show.last().date
-#
-#     context["min_temp_per_period"] = data_to_show.aggregate(
-#         Min("min_temp_of_day"))["min_temp_of_day__min"]
-#
-#     context["avg_temp_per_period"] = round(data_to_show.aggregate(
-#         Avg("avg_temp_of_day"))["avg_temp_of_day__avg"])
-#
-#     context["max_temp_per_period"] = data_to_show.aggregate(
-#         Max("max_temp_of_day"))["max_temp_of_day__max"]
-#
-#     if int(start_date[:4]) < int(end_date[:4]) + 2:
-#         context["years_avg_min"] = data_to_show.values("date_year").annotate(
-#             Avg("min_temp_of_day")
-#         ).order_by("date_year")
-#         context["years_avg_max"] = data_to_show.values("date_year").annotate(
-#             Avg("max_temp_of_day")
-#         ).order_by("date_year")
-#
-#     days_without_precipitation = data_to_show.annotate(
-#         Count("precipMM")).filter(precipMM=0).count()
-#
-#     context["percent_days_of_precipitation"] = round(
-#         days_without_precipitation / data_to_show.annotate(
-#             days=Count("precipMM")
-#         )
-#         .count() * 100
-#     )
-#
-#     context["most_common_precipitations"] = data_to_show.values(
-#         "most_common_weather"
-#     ).annotate(
-#         count=Count("most_common_weather")).order_by("-count")[:2]
-#
-#     context["avg_wind_speed"] = round(
-#         data_to_show.aggregate(
-#             Avg("wind_avg_velocity"
-#                 )
-#         )["wind_avg_velocity__avg"])
-#     wind_directions = [day.wind_avg_direction for day in data_to_show]
-#
-#     context["avg_wind_direction"] = round(
-#         calculate_average_wind_direction(wind_directions)
-#     )
-#
-#     return context
-#
-#
-# def find_most_common_weather(descriptions):
-#     d = defaultdict(int)
-#     for value in descriptions:
-#         d[value] += 1
-#     result, _ = max(d.items(), key=lambda x: x[1])
-#     return result
-#
-#
-# def calculate_average_wind_direction(winds: list):  # without speed
-#     sin_m = []
-#     cos_m = []
-#     for i in range(len(winds)):
-#         sin_m.append(math.sin(winds[i]*math.pi/180))
-#         cos_m.append(math.cos(winds[i]*math.pi/180))
-#     atan_rad = math.atan2(sum(sin_m)/len(winds), sum(cos_m)/len(winds))
-#     return round(atan_rad*180/math.pi)
+def download_from_wwo(enddate=date.today()):
+    """checks db and gets updates from api"""
+    link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
+    # wwo_api_key = os.environ.get('WWO_API')
+
+    try:
+        latest_saved = OneDayData.objects.latest('id').date
+    except ObjectDoesNotExist:
+        latest_saved = date(2010, 1, 1)
+
+    if latest_saved == enddate:
+        return
+    elif latest_saved == date(2010, 1, 1):
+        startdate = latest_saved
+    else:
+        startdate = latest_saved + timedelta(1)
+
+    def downloader(startdate, enddate):
+        for obj in CityList.objects.all():
+            city = str(obj)
+            payload = {
+                "q": city,
+                "tp": '24',
+                "date": startdate,
+                "enddate": enddate,
+                "format": "json",
+                "key": wwo_api_key
+            }
+            response = requests.get(link, params=payload)
+
+            try:  # in case of empty response at start of the day
+                weather = response.json()['data']['weather']
+            except KeyError:
+                return
+
+            for day in weather:
+                o = OneDayData(
+                    city=obj,
+                    date=day['date'],
+                    maxTemp=day['maxtempC'],
+                    minTemp=day['mintempC'],
+                    avgTemp=day['avgtempC'],
+                    windSpeed=day['hourly'][0]['windspeedKmph'],
+                    windDir=day['hourly'][0]['winddir16Point'],
+                    precipitation=day['hourly'][0]['precipMM'],
+                    desc=day['hourly'][0]['weatherDesc'][0]['value']
+                )
+                o.save()
+
+    # api provides only 35 days data in one request
+    if (enddate - startdate).days <= 35:
+        return downloader(startdate, enddate)
+    elif (enddate - startdate).days > 35:
+        while startdate < (enddate - timedelta(35)):
+            downloader(startdate, enddate)
+            startdate += timedelta(35)
+        downloader(startdate, enddate)

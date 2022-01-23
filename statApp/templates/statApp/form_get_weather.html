@@ -4,12 +4,9 @@
 {% block 'form_get_weather' %}
 <form method="post" class="col-md">
     {% csrf_token %}
-    {{ city_and_date_form.as_p }}
-    <div class=" input-group">
-
-        <div class="input-group-btn">
+    {{ city_and_date_form }}
+        <span class="input-group-btn">
             <button type="submit" class="btn btn-primary">Calculate</button>
-        </div>
-    </div>
+        </span>
 </form>
 {% endblock %}
