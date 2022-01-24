@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import *
+
+from .models import CityList, OneDayData
 
 
 @admin.register(OneDayData)
@@ -8,5 +9,5 @@ class WeatherAdmin(admin.ModelAdmin):
 
 
 @admin.register(CityList)
-class WeatherAdmin(admin.ModelAdmin):
+class CityAdmin(admin.ModelAdmin):
     pass

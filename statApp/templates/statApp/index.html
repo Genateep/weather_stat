@@ -33,13 +33,21 @@
     <div class="col d-flex justify-content-center">
         <div class=" card text-dark bg-dark mb-6">
             <div class=" card-body">
-                <h4><span class="badge badge-primary">Min temperature :</span> {{stat.abs_min_temp}} °C</h4>
-                <h4><span class="badge badge-primary">Avg temperature :</span> {{stat.avg_temp}} °C</h4>
-                <h4><span class="badge badge-primary">Max temperature :</span> {{stat.abs_max_temp}} °C</h4>
-                <h4><span class="badge badge-primary">Avg max year temp :</span> {{stat.year_max}} °C</h4>
-                <h4><span class="badge badge-primary">Avg min year temp :</span> {{stat.year_min}} °C</h4>
+                <h4><span class="badge badge-primary">Min temperature :</span> {{stat.abs_min_temp}}°C</h4>
+                <h4><span class="badge badge-primary">Avg temperature :</span> {{stat.avg_temp}}°C</h4>
+                <h4><span class="badge badge-primary">Max temperature :</span> {{stat.abs_max_temp}}°C</h4>
+                <h4><span class="badge badge-primary">Avg min year temp :</span> {% if stat.year_min %}
+                    {% for year in stat.year_min %}
+                        {{ year.date__year }}: {{ year.minTemp__avg }}°C
+                    {% endfor %}
+                {% endif %}</h4>
+                <h4><span class="badge badge-primary">Avg max year temp :</span> {% if stat.year_max %}
+                    {% for year in stat.year_max %}
+                        {{ year.date__year }}: {{ year.maxTemp__avg }}°C
+                    {% endfor %}
+                {% endif %}</h4>
 <!--                <h4><span class="badge badge-primary">Day with similar temp :</span> {{...}}</h4>-->
-                <h4><span class="badge badge-primary">Days with precipitation :</span> {{stat.precip_days}} %</h4>
+                <h4><span class="badge badge-primary">Days with precipitation :</span> {{stat.precip_days}}%</h4>
                 <h4><span class="badge badge-primary">Most frequent precipitation : </span> {{stat.most_frequent_prec}}
                 </h4>
                 <h4><span class="badge badge-primary">Awg wind speed :</span> {{stat.avg_wind_speed}} m/s</h4>

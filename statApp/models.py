@@ -1,10 +1,4 @@
-import datetime
-import os
-import requests
-
-from datetime import date, timedelta
 from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class CityList(models.Model):
@@ -15,7 +9,13 @@ class CityList(models.Model):
 
 
 class OneDayData(models.Model):
-    city = models.ForeignKey(CityList, null=True, blank=True, default=None, on_delete=models.CASCADE)
+    city = models.ForeignKey(
+        CityList,
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.CASCADE
+    )
     date = models.DateField()
     maxTemp = models.SmallIntegerField()
     minTemp = models.SmallIntegerField()

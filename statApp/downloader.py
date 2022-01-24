@@ -1,11 +1,12 @@
+import os
 from datetime import date, timedelta
+
+import dotenv
 import requests
-import json
-from .models import OneDayData, CityList
 from django.core.exceptions import ObjectDoesNotExist
 
-VC_KEY = 'CW9G58J7LK7BR6NJJW595YMPF'
-wwo_api_key = 'f5a196eaccca4cfe84a191947222301'
+from .models import CityList, OneDayData
+
 CITIES = [
         'Moscow',
         'Saint Petersburg',
@@ -25,13 +26,8 @@ CITIES = [
     ]
 
 
-# for city in CITIES:
-#     c = CityList(city=city)
-#     c.save()
-
-
 # def download_from_vc(enddate=date.today()):
-#     link = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weatherdata/history?'
+#     link = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weatherdata/history?'  # noqa
 #     # VC_KEY = os.environ.get('VC_KEY')
 #     try:
 #         latest_saved = OneDayData.objects.latest('id').date
@@ -47,7 +43,6 @@ CITIES = [
 #
 #     def downloader(startdate, enddate):
 #         for obj in CityList.objects.all():
-#             print(type(obj))
 #             city = str(obj)
 #             payload = {
 #                 "locations": city,
@@ -59,7 +54,6 @@ CITIES = [
 #                 "key": VC_KEY,
 #             }
 #             response = requests.get(link, params=payload)
-#             print(response.json())
 #             for day in response.json()['locations'][city]['values']:
 #                 o = OneDayData(
 #                     city=obj,
@@ -85,10 +79,8 @@ CITIES = [
 
 def download_from_wwo(enddate=date.today()):
     """checks db and gets updates from api"""
-    link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
-    # wwo_api_key = os.environ.get('WWO_API')
 
-    try:
+    try:  # checks db for last entry to start from
         latest_saved = OneDayData.objects.latest('id').date
     except ObjectDoesNotExist:
         latest_saved = date(2010, 1, 1)
@@ -100,23 +92,35 @@ def download_from_wwo(enddate=date.today()):
     else:
         startdate = latest_saved + timedelta(1)
 
-    def downloader(startdate, enddate):
+    def requester(cityname, start, end):
+        link = "https://api.worldweatheronline.com/premium/v1/past-weather.ashx"
+        dotenv.load_dotenv(dotenv.find_dotenv())
+        wwo_api_key = os.environ['WWO_API']
+
+        payload = {
+            "q": cityname,
+            "tp": '24',
+            "date": start,
+            "enddate": end,
+            "format": "json",
+            "key": wwo_api_key
+        }
+        response = requests.get(link, params=payload)
+        return response.json()['data']['weather']
+
+    def downloader(start, end):
+
+        for c in CITIES:  # upd list of cities
+            CityList.objects.get_or_create(city=c)
+
         for obj in CityList.objects.all():
             city = str(obj)
-            payload = {
-                "q": city,
-                "tp": '24',
-                "date": startdate,
-                "enddate": enddate,
-                "format": "json",
-                "key": wwo_api_key
-            }
-            response = requests.get(link, params=payload)
 
-            try:  # in case of empty response at start of the day
-                weather = response.json()['data']['weather']
-            except KeyError:
-                return
+            try:
+                weather = requester(city, start, end)
+            except KeyError:  # in case of empty response at start of the day
+                end -= timedelta(1)
+                weather = requester(city, start, end)
 
             for day in weather:
                 o = OneDayData(
@@ -132,7 +136,7 @@ def download_from_wwo(enddate=date.today()):
                 )
                 o.save()
 
-    # api provides only 35 days data in one request
+    # worldweatheronline-api provides up to 35 days data in one request only
     if (enddate - startdate).days <= 35:
         return downloader(startdate, enddate)
     elif (enddate - startdate).days > 35:
