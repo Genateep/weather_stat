@@ -1,9 +1,9 @@
 from django.db.models import Avg, Count, Max, Min
 from django.views.generic import TemplateView
-from .instr.calculator import Calculator
 
 from .downloader import download_from_wwo
 from .forms import CityAndDatesForm
+from .instr.calculator import Calculator
 from .models import OneDayData
 
 
@@ -45,7 +45,7 @@ class IndexPage(TemplateView):
             if not raw_data:  # in case of empty suite e.g. at start of the day
                 return context
 
-            context['stat'] = Calculator(
+            context['stat'] = Calculator(  # creates calculated parameters
                 raw_data,
                 city,
                 start_date,
