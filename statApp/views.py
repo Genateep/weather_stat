@@ -1,7 +1,5 @@
-from django.db.models import Avg, Count, Max, Min
 from django.views.generic import TemplateView
 
-# from .downloader import download_from_wwo
 from .forms import CityAndDatesForm
 from .instr.calculator import Calculator
 from .models import OneDayData
@@ -28,7 +26,6 @@ class IndexPage(TemplateView):
         post_data = kwargs['request'].POST or None
 
         if post_data:
-            # download_from_wwo()
 
             city = post_data['city']
             start_date = post_data['start_date']

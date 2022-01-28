@@ -1,13 +1,12 @@
 import asyncio
-import aiohttp
 import os
 import time
 from datetime import date, timedelta
 from random import randint
 
+import aiohttp
 import aiosqlite
 import dotenv
-import requests
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 wwo_api_keys = [
