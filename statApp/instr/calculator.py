@@ -1,14 +1,16 @@
 from django.db.models import Avg, Count, Max, Min
+from time import time
 
 
 class Calculator:
     """creates a dictionary with calculated parameters to the context
     """
-    def __init__(self, raw_data, city, start_date, end_date):
+    def __init__(self, raw_data, city, start_date, end_date, post_time):
         self.raw_data = raw_data
         self.city = city
         self.start_date = start_date
         self.end_date = end_date
+        self.post_time = post_time
 
     def stat(self) -> dict:
         stat = {
@@ -24,7 +26,8 @@ class Calculator:
             'precip_days': self.precip_days(self.raw_data),
             'most_frequent_prec': self.most_frequent_prec(self.raw_data),
             'avg_wind_speed': self.avg_wind_speed(self.raw_data),
-            'avg_wind_dir': self.avg_wind_dir(self.raw_data)
+            'avg_wind_dir': self.avg_wind_dir(self.raw_data),
+            'request_time': round(time() - self.post_time, 3)
         }
         return stat
 

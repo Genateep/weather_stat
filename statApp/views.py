@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from .forms import CityAndDatesForm
 from .instr.calculator import Calculator
 from .models import OneDayData
+from time import time
 
 
 class IndexPage(TemplateView):
@@ -26,7 +27,7 @@ class IndexPage(TemplateView):
         post_data = kwargs['request'].POST or None
 
         if post_data:
-
+            post_time = time()
             city = post_data['city']
             start_date = post_data['start_date']
             end_date = post_data['end_date']
@@ -46,7 +47,8 @@ class IndexPage(TemplateView):
                 raw_data,
                 city,
                 start_date,
-                end_date
+                end_date,
+                post_time
             ).stat
         return context
 
